@@ -1,0 +1,290 @@
+{
+  "name": "Autonomous Case Study Generator with Google Docs Integration",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "8d7d89b6-0111-4d4e-92bc-778f65981e9b",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "topic",
+              "value": "AI in Banking",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "recipientEmail",
+              "value": "aravindans583224205003@nprcolleges.org",
+              "type": "string"
+            },
+            {
+              "id": "142d4a95-6566-42b2-9122-6d905e80c264",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "31f947b7-f23e-4326-b101-eed2ecc0b037",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.topic }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an autonomous Case Study Generator AI used inside an n8n automation workflow.\n\nYour role:\n- Quickly research the given topic\n- Generate a professional, well-structured case study\n- Ensure the output is ready to be saved directly into Google Docs\n\nOperating rules:\n- Work efficiently; do NOT perform long or deep research\n- Prioritize clarity, correctness, and practical relevance\n- Do NOT ask follow-up questions\n- Do NOT include explanations about your process\n- Do NOT mention that you are an AI or part of n8n\n- Output must be clean and final\n\nOutput requirements:\n- Use Markdown formatting\n- Clear section headings\n- Professional tone\n- No emojis\n- No filler content\n- No prompt or system text in the output\n\nMandatory sections to include in this exact order:\n\n1. Executive Summary\n   - Brief overview (4–6 lines)\n\n2. Background\n   - Context and relevance of the topic\n\n3. Problem Statement\n   - Core challenge or issue addressed\n\n4. Solution / Approach\n   - Methods, tools, or strategies used\n\n5. Key Insights & Findings\n   - Bullet points\n   - Include metrics or data when applicable\n\n6. Real-World Examples / Use Cases\n   - Short and relevant examples (if applicable)\n\n7. Research & Reference Links\n   - List external sources\n   - Mention source names clearly\n\n8. Image Suggestions\n   - 2–4 relevant image ideas\n   - Include source URLs\n   - Add short captions\n\n9. Conclusion\n   - Key takeaway\n   - Optional future outlook\n\nFinal output rules:\n- Return ONLY the completed case study\n- No headings outside the required structure\n- No additional commentary\n- Content must be directly usable in Google Docs without editing"
+        }
+      },
+      "id": "ce825dab-c05f-429d-a48f-25affa87e85a",
+      "name": "Case Study Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "38afbf8e-0f2a-4337-b99b-f0e72d3566cc",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        208
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Gg7Wsgl25bsNi3BF",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "420866a6-cddf-461a-9913-16ad7c7c7bec",
+      "name": "SerpApi (Google Search)",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        208
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "AVwvgy7ATk7DmvrB",
+          "name": "SerpAPI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"caseStudy\": {\n      \"type\": \"string\",\n      \"description\": \"Complete markdown-formatted case study\"\n    }\n  },\n  \"required\": [\"caseStudy\"]\n}"
+      },
+      "id": "fc03adf3-457f-4272-9dbb-7bbe8d08099c",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output.caseStudy }}",
+        "options": {}
+      },
+      "id": "1edb1011-6fe4-4cfa-b8c4-b94cb2231385",
+      "name": "Convert Markdown to HTML",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "html",
+        "options": {
+          "fileName": "={{ $('Workflow Configuration').first().json.topic }} - Case Study.pdf"
+        }
+      },
+      "id": "02be52c0-0c1a-439d-aa1c-56c2c2721fbe",
+      "name": "Convert HTML to PDF",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "=aravindans583224205003@nprcolleges.org\n",
+        "subject": "={{ 'Case Study: ' + $('Workflow Configuration').first().json.topic }}",
+        "message": "={{ 'Please find attached the case study on ' + $('Workflow Configuration').first().json.topic + '.' }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "id": "6640fbee-8ee8-473c-93e8-bba0526daf41",
+      "name": "Send Email with PDF",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2048,
+        -16
+      ],
+      "webhookId": "efcaa37c-a42b-468f-8f3e-083142e352d7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f2uJKn6WTKsEFVmE",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Case Study Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Case Study Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpApi (Google Search)": {
+      "ai_tool": [
+        [
+          {
+            "node": "Case Study Generator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Case Study Generator Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Case Study Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert Markdown to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Markdown to HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert HTML to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert HTML to PDF": {
+      "main": [
+        [
+          {
+            "node": "Send Email with PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ed51544d-ed47-447a-bac8-a811f99f17f0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "455a94eac72a25232d61aac36e2aee7bcb3554a15949c0f80305c8b123dcc2ef"
+  },
+  "id": "OwmpBFqLzEbkkWnn",
+  "tags": []
+}
